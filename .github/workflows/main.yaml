@@ -21,8 +21,8 @@ jobs:
           script: 
             cd ./taro-deploy && 
             git pull &&
-            echo "Change version to ${{ github.head_ref }}.${{ github.sha }}" &&
-            cat "${{ github.head_ref }}.${{ github.sha }}" >> ./version/taro-discord-bot.txt
+            echo "Change version to ${{ github.sha }}" &&
+            echo "${{ github.sha }}" >> ./version/taro-discord-bot.txt
             git add . &&
             git commit -m "Change version taro-discord-bot to ${GITHUB_SHA::6}" &&
             git push
