@@ -1,0 +1,28 @@
+name: Change CI Version
+
+on: [push]
+
+jobs:
+
+  deploy:
+    if: github.ref == 'refs/heads/master'
+    runs-on: [ubuntu-latest]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Deploy
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SERVER_IP }}
+          username: ${{ secrets.SERVER_USERNAME }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          script_stop: true
+          debug: true
+          command_timeout: 200m
+          script: 
+            cd ./taro-deploy && 
+            git pull &&
+            echo "Change version to ${GITHUB_SHA::6}" &&
+            cat "${GITHUB_SHA::6}" >> ./version/taro-discord-bot.txt
+            git add . &&
+            git commit -m "Change version taro-discord-bot to ${GITHUB_SHA::6}" &&
+            git push
