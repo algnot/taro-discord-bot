@@ -20,9 +20,9 @@ jobs:
           command_timeout: 200m
           script: 
             cd ./taro-deploy && 
-            git pull &&
+            git reset --hard origin/master &&
             echo "Change version to ${{ github.sha }}" &&
             echo "${{ github.sha }}" >> ./version/taro-discord-bot.txt
-            git add . &&
-            git commit -m "Change version taro-discord-bot to ${GITHUB_SHA::6}" &&
+            git add ./version/taro-discord-bot.txt &&
+            git commit -m "Change version taro-discord-bot to ${{ github.sha }}" &&
             git push
