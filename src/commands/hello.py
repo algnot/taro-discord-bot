@@ -13,6 +13,6 @@ def handle(bot:discord.Client, tree:discord.app_commands.CommandTree):
     async def call(interaction: discord.Interaction):
         await interaction.response.defer(ephemeral=True)
         if not bot.is_ready():
-            return await interaction.followup.send("⌛ รอสักครู่นะครับ กำลังเปิดระบบอยู่...")        
+            return await interaction.followup.send("⌛ รอสักครู่นะครับ กำลังเปิดระบบอยู่...")
         await interaction.followup.send(f"pong in `{config.get('ENV')}` environment!")
         
