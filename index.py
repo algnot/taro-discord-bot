@@ -5,6 +5,7 @@ from src.utils.config import Config
 from src.utils.logger import Logger
 from src.utils.error_handle import handle_command_error, handle_on_bot_error
 from src.messages.message_handle import handle_message
+from src.controllers.init_controller import init_controller
 
 config = Config()
 logger = Logger()
@@ -15,6 +16,8 @@ tree = discord.app_commands.CommandTree(bot)
 tree.on_error = handle_command_error
 bot.on_error = handle_on_bot_error
 
+bot_ready_event = threading.Event()
+
 for file in os.listdir("./src/commands"):
     if file.endswith(".py") and file != "__init__.py":
         file_name = file.split(".")[0]
@@ -23,6 +26,7 @@ for file in os.listdir("./src/commands"):
 
 @bot.event
 async def on_ready():
+    bot_ready_event.set() 
     guilds = bot.guilds
     env = config.get('ENV') 
     if env == "production":
@@ -42,4 +46,5 @@ def run_discord_bot():
 if __name__ == "__main__":
     discord_thread = threading.Thread(target=run_discord_bot)
     discord_thread.start()
-    discord_thread.join()
+    bot_ready_event.wait()
+    init_controller(bot)
