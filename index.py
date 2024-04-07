@@ -15,10 +15,10 @@ service_name = config.get("SERVICE_NAME", "taro-discord-bot")
 bot = discord.Client(intents=discord.Intents.all())
 tree = discord.app_commands.CommandTree(bot)
 
+bot_ready_event = threading.Event()
+
 tree.on_error = handle_command_error
 bot.on_error = handle_on_bot_error
-
-bot_ready_event = threading.Event()
 
 if service_name == "taro-discord-bot":
     for file in os.listdir("./src/commands"):
