@@ -22,7 +22,7 @@ jobs:
             cd ./taro-deploy && 
             git reset --hard origin/master &&
             echo "Change version to ${{ github.sha }}" &&
-            echo "${{ github.sha }}" >> ./version/taro-discord-bot.txt &&
+            echo "${{ github.sha }}" > ./version/taro-discord-bot.txt &&
             git add ./version/taro-discord-bot.txt &&
             git commit -m "Change version taro-discord-bot to ${{ github.sha }}" &&
             git push
