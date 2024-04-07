@@ -20,6 +20,3 @@ async def handle_message(message: discord.Message):
         
     if content == "ping":
         await on_ping_message(message, is_admin)
-        
-    elif content == "test":
-        await message.channel.send("test message") 
