@@ -4,6 +4,7 @@ import os
 from src.utils.config import Config
 from src.utils.logger import Logger
 from src.utils.error_handle import handle_command_error, handle_on_bot_error
+from src.messages.message_handle import handle_message
 
 config = Config()
 logger = Logger()
@@ -23,10 +24,18 @@ for file in os.listdir("./src/commands"):
 @bot.event
 async def on_ready():
     guilds = bot.guilds
-    logger.warning(f"[Discord] Bot is ready on `{config.get('ENV')}` environment!")
+    env = config.get('ENV') 
+    if env == "production":
+        logger.warning(f"[Discord] Bot is ready on `{config.get('ENV')}` environment!")
+    else:
+        logger.info(f"[Discord] Bot is ready on `{config.get('ENV')}` environment!")
     for guild in guilds:
         await tree.sync(guild=discord.Object(id=guild.id))
-        
+
+@bot.event
+async def on_message(message):
+    await handle_message(message)
+    
 def run_discord_bot():
     bot.run(config.get("TARO_DISCORD_TOKEN"))
 
