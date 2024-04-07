@@ -18,4 +18,4 @@ def init_runner(bot: discord.Client):
 
     init_spotify_job(scheduler=scheduler, bot=bot)
 
-    app.run(port=config.get("HTTP_PORT", "3000"))
+    app.run(host="0.0.0.0", port=config.get("HTTP_PORT", "3000"))
