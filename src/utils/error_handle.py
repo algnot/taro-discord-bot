@@ -1,6 +1,5 @@
 from .logger import Logger
 from .config import Config
-import traceback
 
 logger = Logger()
 config = Config()
