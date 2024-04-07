@@ -1,6 +1,7 @@
 import discord
 from ..utils.config import Config
 
+
 async def on_ping_message(message: discord.Message, is_admin: bool):
     if not is_admin:
         await message.add_reaction("❌")

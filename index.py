@@ -54,6 +54,8 @@ def run_discord_bot():
 if __name__ == "__main__":
     discord_thread = threading.Thread(target=run_discord_bot)
     discord_thread.start()
-    bot_ready_event.wait()
-    if service_name == "taro-discord-controller":
+    if service_name == "taro-discord-bot":
+        discord_thread.join()
+    elif service_name == "taro-discord-controller":
+        bot_ready_event.wait()
         init_controller(bot)

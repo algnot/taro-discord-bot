@@ -6,6 +6,7 @@ import discord
 app = Flask(__name__)
 config = Config()
 
+
 def init_controller(bot:discord.Client):
     @app.route('/', methods=['GET'])
     def index():

@@ -2,6 +2,7 @@ import discord
 from ..utils.config import Config
 from .ping_message import on_ping_message
 
+
 async def handle_message(message: discord.Message):
     config = Config()
     if message.author.bot:
@@ -13,7 +14,7 @@ async def handle_message(message: discord.Message):
     is_admin = str(user.id) in admin_list
     
     content = message.content.lower()
-    # content_splited = message.content.split(" ")
+    content_splited = message.content.split(" ")
     
     if is_admin:
         await message.add_reaction("🐶")
