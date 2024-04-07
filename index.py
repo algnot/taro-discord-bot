@@ -6,6 +6,7 @@ from src.utils.logger import Logger
 from src.utils.error_handle import handle_command_error, handle_on_bot_error
 from src.messages.message_handle import handle_message
 from src.controllers.init_controller import init_controller
+from src.jobs.init_runner import init_runner
 
 config = Config()
 logger = Logger()
@@ -25,7 +26,6 @@ if service_name == "taro-discord-bot":
             file_name = file.split(".")[0]
             handle = getattr(__import__(f"src.commands.{file_name}", fromlist=["handle"]), "handle")
             handle(bot, tree)
-
 
     @bot.event
     async def on_message(message):
@@ -59,3 +59,6 @@ if __name__ == "__main__":
     elif service_name == "taro-discord-controller":
         bot_ready_event.wait()
         init_controller(bot)
+    elif service_name == "taro-discord-runner":
+        bot_ready_event.wait()
+        init_runner(bot)
