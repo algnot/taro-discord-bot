@@ -22,4 +22,4 @@ async def handle_message(message: discord.Message):
         await on_ping_message(message, is_admin)
         
     elif content == "test":
-        await message.channel.send(f"test message") 
+        await message.channel.send("test message") 
