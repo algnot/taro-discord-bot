@@ -7,11 +7,11 @@ class Config:
     def __init__(self):
         load_dotenv()
 
-    def get(self, name: str, defualt=""):
+    def get(self, name: str, defualtVakue=""):
         try:
             if name in os.environ:
                 return os.environ[name]
-            
-            return defualt
+
+            return defualtVakue
         except Exception:
-            return defualt
+            return defualtVakue

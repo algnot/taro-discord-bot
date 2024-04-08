@@ -10,13 +10,13 @@ from random import randint
 
 
 def init_spotify_job(scheduler: BackgroundScheduler, bot: discord.Client, app: Flask = None):
-    spotify = Spotify()
     logger = Logger()
+    config = Config()
 
     @jobs(scheduler=scheduler, cron="0 10,15 * * *", controller=app)
     def random_spotify_song_and_send_to_channel():
         try:
-            config = Config()
+            spotify = Spotify()
             discord_guild_id = int(config.get("DISCORD_GUILD_ID"))
             discord_channel_id = int(config.get("DISCORD_CHANNEL_PLAY_WITH_TARO"))
 
