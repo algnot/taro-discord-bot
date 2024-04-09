@@ -17,6 +17,10 @@ def init_runner(bot: discord.Client):
 
     @app.route('/', methods=['GET'])
     def index():
+        return "Taro Runner is running :)"
+
+    @app.route('/jobs', methods=['GET'])
+    def get_all_jobs():
         return {
             "jobs": JOBS
         }
