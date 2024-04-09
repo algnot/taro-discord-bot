@@ -2,6 +2,7 @@ import discord
 from ..utils.config import Config
 from requests import get
 from enum import Enum
+from ..jobs.static import JOBS
 
 
 def handle(bot: discord.Client, tree: discord.app_commands.CommandTree):
@@ -10,13 +11,7 @@ def handle(bot: discord.Client, tree: discord.app_commands.CommandTree):
 
     config = Config()
     discord_guild_id = int(config.get("DISCORD_GUILD_ID"))
-
-    get_job_response = get(config.get("TARO_RUNNER_ENDPOINT", "taro-discord-runner:3000"))
-
-    if not get_job_response.ok:
-        return
-
-    job_list = get_job_response.json()["jobs"]
+    job_list = JOBS
 
     if len(job_list) == 1:
         job_list["none"] = "none"
