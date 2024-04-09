@@ -15,8 +15,9 @@ def jobs(scheduler: BackgroundScheduler, cron="* * * * *", controller: Flask = N
 
         if controller:
             logger.info(f"initial route job '/job/{func.__name__}'")
+            route_function_name = f"{func.__name__}_route"
 
-            @controller.route(f"/job/{func.__name__}", methods=['GET'])
+            @controller.route(f"/job/{func.__name__}", methods=['GET'], endpoint=route_function_name)
             def call_runner():
                 return_value = func()
                 if isinstance(return_value, bool):

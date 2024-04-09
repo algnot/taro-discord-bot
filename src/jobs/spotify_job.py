@@ -31,4 +31,4 @@ def init_spotify_job(scheduler: BackgroundScheduler, bot: discord.Client, app: F
             return True
         except Exception as error:
             logger.error(f"Can not run job 'random_spotify_song_and_send_to_channel' with error {error}")
-            return error
+            raise error
