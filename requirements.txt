@@ -3,3 +3,5 @@ python-dotenv
 Flask
 discord.py
 APScheduler
+sqlalchemy
+psycopg2

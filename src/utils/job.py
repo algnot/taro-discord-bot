@@ -5,13 +5,14 @@ from flask import Flask
 logger = Logger()
 
 
-def jobs(scheduler: BackgroundScheduler, cron="* * * * *", controller: Flask = None, *args, **kwargs):
+def jobs(scheduler: BackgroundScheduler = None, cron="* * * * *", controller: Flask = None, *args, **kwargs):
     minute, hour, day, month, year = cron.split()
 
     def decorator(func):
-        logger.info(f"initial job '{func.__name__}' with '{cron}'")
-        scheduler.add_job(func, "cron", minute=minute, hour=hour, day=day,
-                          month=month, year=year, *args, **kwargs)
+        if scheduler:
+            logger.info(f"initial job '{func.__name__}' with '{cron}'")
+            scheduler.add_job(func, "cron", minute=minute, hour=hour, day=day,
+                              month=month, year=year, *args, **kwargs)
 
         if controller:
             logger.info(f"initial route job '/job/{func.__name__}'")
