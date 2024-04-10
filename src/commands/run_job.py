@@ -3,6 +3,7 @@ from ..utils.config import Config
 from requests import get
 from enum import Enum
 from ..jobs.static import JOBS
+import threading
 
 
 def handle(bot: discord.Client, tree: discord.app_commands.CommandTree):
@@ -34,7 +35,11 @@ def handle(bot: discord.Client, tree: discord.app_commands.CommandTree):
             await interaction.followup.send(f"❌ Can not use this command")
             return
 
-        runner_endpoint = config.get("TARO_RUNNER_ENDPOINT", "taro-discord-runner:3000")
-        result = get(f"{runner_endpoint}/job/{job.name}")
+        await interaction.followup.send(f"Requesting to run job `{job.name}`")
 
-        await interaction.followup.send(f"Run job `{job.name}` success with response `{result.text}`")
+        def run_job_in_background():
+            runner_endpoint = config.get("TARO_RUNNER_ENDPOINT", "taro-discord-runner:3000")
+            get(f"{runner_endpoint}/job/{job.name}")
+
+        job_thread = threading.Thread(target=run_job_in_background, args=())
+        job_thread.start()
