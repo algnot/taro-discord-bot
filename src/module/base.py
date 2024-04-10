@@ -1,6 +1,7 @@
 from sqlalchemy import create_engine
 from ..utils.config import Config
 from ..utils.logger import Logger
+from sqlalchemy import text
 
 
 class Base:
@@ -25,12 +26,14 @@ class Base:
         self.client.dispose()
         return self
 
-    def execute(self, query):
+    def execute(self, query, *args, **kwargs):
         try:
-            res = self.connect.execute(query)
+            with self.client.begin():
+                res = self.connect.execute(text(query), args[0])
+                self.connect.commit()
             results = []
 
-            if not res:
+            if not res or not res.returns_rows:
                 return []
 
             for row in res:
@@ -39,7 +42,9 @@ class Base:
                     result[key] = row[key]
                 results.append(result)
             return results
-        except Exception:
+        except Exception as error:
+            self.connect.rollback()
+            self.logger.info(f"Con not execute '{query}' database will rollback with error {error}")
             return []
 
     def to_dict(self):
