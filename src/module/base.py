@@ -28,24 +28,16 @@ class Base:
 
     def execute(self, query, *args, **kwargs):
         try:
-            with self.client.begin():
-                res = self.connect.execute(text(query), args[0])
-                self.connect.commit()
-            results = []
+            with self.client.begin() as conn:
+                res = conn.execute(text(query), *args)
+                results = []
 
-            if not res or not res.returns_rows:
-                return []
+                if not res or not res.returns_rows:
+                    return []
 
-            for row in res:
-                result = {}
-                for key in row.keys():
-                    result[key] = row[key]
-                results.append(result)
-            return results
+                for row in res:
+                    results.append(row._mapping)
+                return results
         except Exception as error:
-            self.connect.rollback()
             self.logger.info(f"Con not execute '{query}' database will rollback with error {error}")
             return []
-
-    def to_dict(self):
-        return {key: value for key, value in self.__dict__.items() if not key.startswith("_")}

@@ -7,6 +7,7 @@ from ..utils.logger import Logger
 from ..utils.error_handle import handle_job_error
 from ..module.base import Base
 from ..module.users import User
+from ..module.vault import Vault
 from sqlalchemy import MetaData, Table, Column, text, BIGINT, TEXT
 from requests import get
 
@@ -17,14 +18,13 @@ def init_migrate_database_job(scheduler: BackgroundScheduler, bot: discord.Clien
 
     @jobs(scheduler=scheduler, cron="0 22 * * *", controller=app)
     @handle_job_error
-    def migrate_database_job():
+    def migrate_users_data_job():
         base = Base()
         engine = base.client
         metadata = MetaData()
 
-        # Create All table
+        # Create user table
         Table("users", metadata, Column("id", BIGINT, primary_key=True))
-        Table("vault", metadata, Column("name", TEXT, primary_key=True))
         metadata.create_all(engine)
 
         logger.info("Migrating users table..")
@@ -38,11 +38,27 @@ def init_migrate_database_job(scheduler: BackgroundScheduler, bot: discord.Clien
         migrate_user_data()
         logger.info(f"Migrate users table done")
 
+        return True
+
+    @jobs(scheduler=scheduler, cron="0 0 * * *", controller=app)
+    @handle_job_error
+    def migrate_vault_data_job():
+        base = Base()
+        engine = base.client
+        metadata = MetaData()
+        vault = Vault()
+
+        # Create vault table
+        Table("vault", metadata, Column("name", TEXT, primary_key=True))
+        metadata.create_all(engine)
+
         logger.info("Migrating vault table..")
         create_column(base.connect, "vault", "init_value", "BIGINT DEFAULT 0")
         create_column(base.connect, "vault", "remaining_value", "BIGINT DEFAULT 0")
         create_column(base.connect, "vault", "relate_table", "TEXT")
         create_column(base.connect, "vault", "relate_column", "TEXT")
+        vault.create_or_update_value_vault(name="taro_coin", init_value=5000000, relate_table="users",
+                                           relate_column="taro_coin")
         logger.info(f"Migrate vault table done")
 
         return True
@@ -67,7 +83,7 @@ def init_migrate_database_job(scheduler: BackgroundScheduler, bot: discord.Clien
     def create_column(engine, table, column_name, type):
         try:
             logger.info(f"ALTER TABLE {table} ADD COLUMN {column_name} {type};")
-            with engine.begin():
-                engine.execute(text(f"ALTER TABLE {table} ADD COLUMN {column_name} {type};"))
+            with engine.begin() as conn:
+                conn.execute(text(f"ALTER TABLE {table} ADD COLUMN {column_name} {type};"))
         except Exception as e:
             return False
