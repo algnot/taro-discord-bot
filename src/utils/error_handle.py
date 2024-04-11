@@ -23,6 +23,7 @@ async def handle_on_bot_error(event, *args, **kwargs):
 def handle_job_error(func):
     def runner(*args, **kwargs):
         try:
+            logger.warning(f"Starting job `{func.__name__}`")
             return_value = func(*args, **kwargs)
             if config.get("ENV", "dev") == "production":
                 logger.warning(f"Run job: `{func.__name__}` successfully")
