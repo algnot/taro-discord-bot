@@ -48,6 +48,7 @@ if service_name == "taro-discord-bot":
                                                         image=member.display_avatar.url)
         await add_role_to_user(member=member, role_id=discord_role_user)
 
+
 @bot.event
 async def on_ready():
     bot_ready_event.set()

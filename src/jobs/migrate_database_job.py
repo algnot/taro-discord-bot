@@ -68,7 +68,7 @@ def init_migrate_database_job(scheduler: BackgroundScheduler, bot: discord.Clien
             users = get(f"{config.get('TARO_CONTROLLER_ENDPOINT')}/users").json()
 
             for user_data in users.get("datas", []):
-                user = User()
+                user = User(id=int(user_data["user_id"]))
                 user.create_or_update_by_id(id=int(user_data["user_id"]),
                                             username=str(user_data["name"]),
                                             display_avatar=str(user_data["display_avatar"]),
