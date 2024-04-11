@@ -4,9 +4,11 @@ import os
 from src.utils.config import Config
 from src.utils.logger import Logger
 from src.utils.error_handle import handle_command_error, handle_on_bot_error
+from src.utils.discord import send_message_to_channel_by_guild_and_channel_id, add_role_to_user
 from src.messages.message_handle import handle_message
 from src.controllers.init_controller import init_controller
 from src.jobs.init_runner import init_runner
+from src.module.users import User
 
 config = Config()
 logger = Logger()
@@ -31,6 +33,20 @@ if service_name == "taro-discord-bot":
     async def on_message(message):
         await handle_message(message)
 
+    @bot.event
+    async def on_member_join(member: discord.Member):
+        discord_guild_id = int(config.get("DISCORD_GUILD_ID"))
+        discord_channel_id = int(config.get("DISCORD_CHANNEL_WELCOME"))
+        discord_role_user = int(config.get("DISCORD_ROLE_USER"))
+        user = User()
+        user.create_or_update_by_id(id=member.id, username=member.name, display_name=member.display_name,
+                                    display_avatar=member.display_avatar.url, is_bot=member.bot,
+                                    created_at=member.created_at.strftime("%Y-%m-%d %H:%M:%S"),
+                                    joined_at=member.joined_at.strftime("%Y-%m-%d %H:%M:%S"))
+        send_message_to_channel_by_guild_and_channel_id(bot=bot, guild_id=discord_guild_id, channel_id=discord_channel_id,
+                                                        message=f"Welcome <@{member.id}> to `u sick achoo` server!  🥳 🎉",
+                                                        image=member.display_avatar.url)
+        await add_role_to_user(member=member, role_id=discord_role_user)
 
 @bot.event
 async def on_ready():
