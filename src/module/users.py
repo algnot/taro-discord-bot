@@ -8,6 +8,18 @@ class User(Base):
         self.id = id
         super().__init__()
 
+    def get_user_info(self):
+        result = self.execute("""
+            SELECT * FROM public.users WHERE id = :id
+        """, {
+            "id": self.id
+        })
+
+        if len(result) > 0:
+            return result[0]
+
+        return {}
+
     def create_or_update_by_id(self, id: int, username: str, display_name: str, display_avatar: str,
                                is_bot: bool, created_at: str, joined_at: str):
         self.id = id
