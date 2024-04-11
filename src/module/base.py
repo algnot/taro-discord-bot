@@ -40,4 +40,5 @@ class Base:
                 return results
         except Exception as error:
             self.logger.info(f"Con not execute '{query}' database will rollback with error {error}")
-            return []
+            self.connect.rollback()
+            raise error

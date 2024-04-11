@@ -28,14 +28,14 @@ def init_migrate_database_job(scheduler: BackgroundScheduler, bot: discord.Clien
         metadata.create_all(engine)
 
         logger.info("Migrating users table..")
-        create_column(base.connect, "users", "username", "TEXT")
-        create_column(base.connect, "users", "display_avatar", "TEXT")
-        create_column(base.connect, "users", "display_name", "TEXT")
-        create_column(base.connect, "users", "is_bot", "BOOLEAN")
-        create_column(base.connect, "users", "created_at", "TIMESTAMP")
-        create_column(base.connect, "users", "joined_at", "TIMESTAMP")
-        create_column(base.connect, "users", "taro_coin", "BIGINT DEFAULT 0")
-        migrate_user_data()
+        create_column(engine, "users", "username", "TEXT")
+        create_column(engine, "users", "display_avatar", "TEXT")
+        create_column(engine, "users", "display_name", "TEXT")
+        create_column(engine, "users", "is_bot", "BOOLEAN")
+        create_column(engine, "users", "created_at", "TIMESTAMP")
+        create_column(engine, "users", "joined_at", "TIMESTAMP")
+        create_column(engine, "users", "taro_coin", "BIGINT DEFAULT 0")
+        migrate_user_data(bot=bot)
         logger.info(f"Migrate users table done")
 
         return True
@@ -48,24 +48,35 @@ def init_migrate_database_job(scheduler: BackgroundScheduler, bot: discord.Clien
         metadata = MetaData()
         vault = Vault()
 
-        # Create vault table
+        # Create all table
         Table("vault", metadata, Column("name", TEXT, primary_key=True))
+        Table("transaction", metadata, Column("id", TEXT, primary_key=True))
         metadata.create_all(engine)
 
+        logger.info("Migrating transaction table..")
+        create_column(engine, "transaction", "token", "TEXT")
+        create_column(engine, "transaction", "from_id", "BIGINT")
+        create_column(engine, "transaction", "to_id", "BIGINT")
+        create_column(engine, "transaction", "amount", "BIGINT")
+        create_column(engine, "transaction", "status", "TEXT")
+        create_column(engine, "transaction", "date", "TIMESTAMP DEFAULT NOW()")
+        logger.info(f"Migrate transaction table done")
+
         logger.info("Migrating vault table..")
-        create_column(base.connect, "vault", "init_value", "BIGINT DEFAULT 0")
-        create_column(base.connect, "vault", "remaining_value", "BIGINT DEFAULT 0")
-        create_column(base.connect, "vault", "relate_table", "TEXT")
-        create_column(base.connect, "vault", "relate_column", "TEXT")
+        create_column(engine, "vault", "remaining_value", "BIGINT DEFAULT 0")
+        create_column(engine, "vault", "init_value", "BIGINT DEFAULT 0")
+        create_column(engine, "vault", "relate_table", "TEXT")
+        create_column(engine, "vault", "relate_column", "TEXT")
         vault.create_or_update_value_vault(name="taro_coin", init_value=5000000, relate_table="users",
                                            relate_column="taro_coin")
         logger.info(f"Migrate vault table done")
 
         return True
 
-    def migrate_user_data():
+    def migrate_user_data(bot: discord.Client):
         try:
             users = get(f"{config.get('TARO_CONTROLLER_ENDPOINT')}/users").json()
+            vault = Vault(name="taro_coin")
 
             for user_data in users.get("datas", []):
                 user = User(id=int(user_data["user_id"]))
@@ -76,6 +87,8 @@ def init_migrate_database_job(scheduler: BackgroundScheduler, bot: discord.Clien
                                             is_bot=bool(user_data["is_bot"]),
                                             created_at=str(user_data["created_at"]),
                                             joined_at=str(user_data["joined_at"]))
+                vault.create_transaction(token_name=vault.name, from_id=bot.user.id,
+                                         to_id=int(user_data["user_id"]), amount=100)
 
         except Exception as error:
             logger.error(f"Skip 'migrate_user_data' get some error {error}")
