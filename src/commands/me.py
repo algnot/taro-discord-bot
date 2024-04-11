@@ -33,7 +33,7 @@ def handle(bot: discord.Client, tree: discord.app_commands.CommandTree):
                               f"เข้า server เมื่อ: `{user_info.get('joined_at', interaction_user.joined_at).strftime('%d/%m/%Y')}`\n",
                         inline=True)
         embed.add_field(name="👾  ไอเท็ม\n",
-                        value=f"_\n\n🪙 `{user_info.get('taro_coin', 0)}` taro coin\n",
+                        value=f"_\n\n🪙 `{user_info.get('taro_coin', 0):,}` taro coin\n",
                         inline=True)
 
         await interaction.followup.send(embed=embed)
