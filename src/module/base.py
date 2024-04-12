@@ -36,7 +36,7 @@ class Base:
                     return []
 
                 for row in res:
-                    results.append(row._mapping)
+                    results.append(dict(row._mapping))
                 return results
         except Exception as error:
             self.logger.info(f"Con not execute '{query}' database will rollback with error {error}")

@@ -25,10 +25,7 @@ def handle_job_error(func):
         try:
             logger.warning(f"Starting job `{func.__name__}`")
             return_value = func(*args, **kwargs)
-            if config.get("ENV", "dev") == "production":
-                logger.warning(f"Run job: `{func.__name__}` successfully")
-            else:
-                logger.info(f"Run job: `{func.__name__}` successfully")
+            logger.warning(f"Run job: `{func.__name__}` successfully")
             return return_value
         except Exception as e:
             logger.error(f"Error when running task: `{func.__name__}` with error {e}`")

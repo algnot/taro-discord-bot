@@ -1,4 +1,5 @@
 from .base import Base
+from .farm import Farm
 
 
 class User(Base):
@@ -9,14 +10,28 @@ class User(Base):
         super().__init__()
 
     def get_user_info(self):
-        result = self.execute("""
+        user_data = self.execute("""
             SELECT * FROM public.users WHERE id = :id
         """, {
             "id": self.id
         })
 
-        if len(result) > 0:
-            return result[0]
+        user_farm = self.execute("""
+            SELECT * FROM public.farm WHERE user_id = :id
+        """, {
+            "id": self.id
+        })
+
+        user_inventory = self.execute("""
+            SELECT * FROM public.inventory WHERE user_id = :id
+        """, {
+            "id": self.id
+        })
+
+        if len(user_data) > 0:
+            user_data[0]["user_farm"] = user_farm
+            user_data[0]["user_inventory"] = user_inventory
+            return user_data[0]
 
         return {}
 
@@ -40,4 +55,11 @@ class User(Base):
             "created_at": created_at,
             "joined_at": joined_at
         })
+
+        user = self.get_user_info()
+
+        if len(user.get("user_farm", [])) == 0:
+            farm = Farm()
+            farm.create_farm_of_user(user_id=id)
+
         self.logger.info(f"Create or update user id {id} done")

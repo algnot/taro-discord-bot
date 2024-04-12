@@ -8,6 +8,8 @@ from ..utils.error_handle import handle_job_error
 from ..module.base import Base
 from ..module.users import User
 from ..module.vault import Vault
+from ..module.item import Item
+from ..module.seed import Seed
 from sqlalchemy import MetaData, Table, Column, text, BIGINT, TEXT
 from requests import get
 
@@ -47,10 +49,16 @@ def init_migrate_database_job(scheduler: BackgroundScheduler, bot: discord.Clien
         engine = base.client
         metadata = MetaData()
         vault = Vault()
+        item = Item()
+        seed = Seed()
 
         # Create all table
         Table("vault", metadata, Column("name", TEXT, primary_key=True))
         Table("transaction", metadata, Column("id", TEXT, primary_key=True))
+        Table("item", metadata, Column("name", TEXT, primary_key=True))
+        Table("seed", metadata, Column("name", TEXT, primary_key=True))
+        Table("farm", metadata, Column("id", BIGINT, primary_key=True, autoincrement="auto"))
+        Table("inventory", metadata, Column("id", BIGINT, primary_key=True, autoincrement="auto"))
         metadata.create_all(engine)
 
         logger.info("Migrating transaction table..")
@@ -71,6 +79,46 @@ def init_migrate_database_job(scheduler: BackgroundScheduler, bot: discord.Clien
                                            relate_column="taro_coin")
         logger.info(f"Migrate vault table done")
 
+        logger.info("Migrating inventory table..")
+        create_column(engine, "inventory", "user_id", "BIGINT")
+        create_column(engine, "inventory", "item_bane", "TEXT")
+        create_column(engine, "inventory", "quantity", "BIGINT DEFAULT 0")
+        logger.info(f"Migrate inventory table done")
+
+        logger.info("Migrating item table..")
+        create_column(engine, "item", "type", "TEXT")
+        create_column(engine, "item", "emoji", "TEXT")
+        create_column(engine, "item", "sell_token", "TEXT")
+        create_column(engine, "item", "sell_amount", "BIGINT")
+        create_column(engine, "item", "buy_token", "TEXT")
+        create_column(engine, "item", "buy_amount", "BIGINT")
+        create_column(engine, "item", "can_sell", "BOOLEAN DEFAULT FALSE")
+        create_column(engine, "item", "can_buy", "BOOLEAN DEFAULT FALSE")
+        item.create_or_update_item_by_name(name="bean_seed", type="seed", sell_token="-", sell_amount=0, can_sell=False,
+                                           buy_token="taro_coin", buy_amount=20, can_buy=True, emoji="🫘")
+        item.create_or_update_item_by_name(name="seed", type="product", sell_token="taro_coin", sell_amount=15, can_sell=True,
+                                           buy_token="-", buy_amount=0, can_buy=False, emoji="🫘")
+        logger.info(f"Migrate item table done")
+
+        logger.info("Migrating seed table..")
+        create_column(engine, "seed", "emoji", "TEXT")
+        create_column(engine, "seed", "harvest_time_interval", "BIGINT")
+        create_column(engine, "seed", "drop_item_name", "TEXT")
+        create_column(engine, "seed", "drop_item_quantity", "BIGINT DEFAULT 1")
+        create_column(engine, "seed", "max_harvest_count", "BIGINT DEFAULT 1")
+        seed.create_or_update_seed_by_name(name="bean_seed", emoji="🫘", harvest_time_interval=(6 * 60 * 60),
+                                           drop_item_name="bean", drop_item_quantity=2, max_harvest_count=3)
+        logger.info(f"Migrate seed table done")
+
+        logger.info("Migrating farm table..")
+        create_column(engine, "farm", "user_id", "BIGINT")
+        create_column(engine, "farm", "harvest_time", "TIMESTAMP")
+        create_column(engine, "farm", "seed_name", "TEXT")
+        create_column(engine, "farm", "harvest_count", "BIGINT DEFAULT 0")
+        create_column(engine, "farm", "level", "BIGINT DEFAULT 1")
+        create_column(engine, "farm", "is_decay", "BOOLEAN DEFAULT FALSE")
+        logger.info(f"Migrate farm table done")
+
         return True
 
     def migrate_user_data(bot: discord.Client):
@@ -87,8 +135,9 @@ def init_migrate_database_job(scheduler: BackgroundScheduler, bot: discord.Clien
                                             is_bot=bool(user_data["is_bot"]),
                                             created_at=str(user_data["created_at"]),
                                             joined_at=str(user_data["joined_at"]))
-                vault.create_transaction(token_name=vault.name, from_id=bot.user.id,
-                                         to_id=int(user_data["user_id"]), amount=100)
+                if config.get("ENV") == "production":
+                    vault.create_transaction(token_name=vault.name, from_id=bot.user.id,
+                                             to_id=int(user_data["user_id"]), amount=100)
 
         except Exception as error:
             logger.error(f"Skip 'migrate_user_data' get some error {error}")
