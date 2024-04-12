@@ -67,17 +67,16 @@ class ShopModal(discord.ui.Modal):
         await interaction.response.defer()
 
         message = await interaction.channel.fetch_message(self.message_id)
-        message_response = await interaction.followup.send(f"⌛ กำลังซื้อ `{self.item_name}` จำนวน `{self.quantity}`",
-                                                            ephemeral=True)
+        await message.edit(content=f"⌛ กำลังซื้อ `{self.item_name}` จำนวน `{self.quantity}`")
 
         try:
             quantity = int(self.quantity.value)
         except Exception:
-            return await message_response.edit(content="❌ กรุณาใส่จำนวนที่ต้องการซื้อเป็นตัวเลขเท่านั้น")
+            return await message.edit(content="❌ กรุณาใส่จำนวนที่ต้องการซื้อเป็นตัวเลขเท่านั้น")
 
         try:
             user = User(id=interaction.user.id)
             transaction_id, emoji = user.buy_item(item_name=self.item_id, quantity=quantity)
-            await message_response.edit(content=f"{emoji} ซื้อ `{self.item_name}` จำนวน `{quantity:,}` สำเร็จ (transaction id: `{transaction_id}`)")
+            await message.edit(content=f"{emoji} ซื้อ `{self.item_name}` จำนวน `{quantity:,}` สำเร็จ (transaction id: `{transaction_id}`)")
         except UserWarning as error:
-            return await message_response.edit(content=error)
+            return await message.edit(content=str(error))

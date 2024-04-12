@@ -26,7 +26,7 @@ class FarmMenuEmbed(discord.Embed):
                 item_name = " ".join(item.get("item_name", "").split("_"))
                 inventory_message += f"{emoji} `{quantity}` {item_name}\n"
 
-        self.add_field(name="👾  ไอเท็ม\n",
+        self.add_field(name="🗒️  ไอเท็ม\n",
                        value=f"_\n\n🪙 `{user_info.get('taro_coin', 0):,}` taro coin\n" +
                              f"🌲 `{len(user_info.get('user_farm', []))}` total farm\n",
                        inline=True)
