@@ -1,22 +1,19 @@
 import discord
 from ..module.users import User
 from ..module.item import Item
-import asyncio
+from discord import ui
 
 
 class ShopMenuEmbed(discord.Embed):
     all_item: list = []
 
-    def __init__(self, interaction:discord.Interaction):
+    def __init__(self, interaction: discord.Interaction):
         interaction_user = interaction.user
-
-        user = User(id=interaction_user.id)
-        user_info = user.get_user_info()
 
         super().__init__(type="article", color=5763719)
 
-        self.set_author(name=f"ฟาร์มของ {user_info.get('username', interaction_user.name)}\n",
-                        icon_url=user_info.get("display_avatar", interaction_user.display_avatar.url))
+        self.set_author(name=f"ฟาร์มของ {interaction_user.name}\n",
+                        icon_url=interaction_user.display_avatar.url)
 
         item = Item()
         all_item_can_buy = item.get_all_item_can_buy()
@@ -27,14 +24,9 @@ class ShopMenuEmbed(discord.Embed):
             emoji = item_can_buy.get("emoji", "")
             name = " ".join(item_can_buy.get("name", "").split("_"))
             token = " ".join(item_can_buy.get("buy_token", "").split("_"))
-            price = item_can_buy.get("buy_amount", "")
+            price = item_can_buy.get("buy_amount", 0)
             type = item_can_buy.get("type", "ชิ้น")
             message_item += f"{emoji} `{name}` ราคา `{price}` {token}/{type}"
-
-        self.add_field(name="👾  ไอเท็มของฉัน\n",
-                        value=f"_\n\n🪙 `{user_info.get('taro_coin', 0):,}` taro coin\n" +
-                              f"🌲 `{len(user_info.get('user_farm', []))}` total farm\n\n.",
-                        inline=False)
 
         self.add_field(name="\n☘️ ไอเท็มในร้าน\n",
                        value=f"_\n\n{message_item}",
@@ -57,3 +49,35 @@ class ShopMenuView(discord.ui.View):
                                         style=discord.ButtonStyle.gray,
                                         custom_id=f"home-{message_id}-{user_id}",
                                         row=0))
+
+
+class ShopModal(discord.ui.Modal):
+    quantity = ui.TextInput(label="จำนวนที่ต้องการ", default="1", placeholder="1")
+    item_name: str = ""
+    item_id: str = ""
+    message_id: int = 0
+
+    def __init__(self, interaction: discord.Interaction, message_id: int):
+        self.message_id = message_id
+        self.item_id = interaction.data["custom_id"].split("-")[3]
+        self.item_name = " ".join(self.item_id.split("_"))
+        super().__init__(title=f"ซื้อ {self.item_name}")
+
+    async def on_submit(self, interaction: discord.Interaction):
+        await interaction.response.defer()
+
+        message = await interaction.channel.fetch_message(self.message_id)
+        message_response = await interaction.followup.send(f"⌛ กำลังซื้อ `{self.item_name}` จำนวน `{self.quantity}`",
+                                                            ephemeral=True)
+
+        try:
+            quantity = int(self.quantity.value)
+        except Exception:
+            return await message_response.edit(content="❌ กรุณาใส่จำนวนที่ต้องการซื้อเป็นตัวเลขเท่านั้น")
+
+        try:
+            user = User(id=interaction.user.id)
+            transaction_id, emoji = user.buy_item(item_name=self.item_id, quantity=quantity)
+            await message_response.edit(content=f"{emoji} ซื้อ `{self.item_name}` จำนวน `{quantity:,}` สำเร็จ (transaction id: `{transaction_id}`)")
+        except UserWarning as error:
+            return await message_response.edit(content=error)

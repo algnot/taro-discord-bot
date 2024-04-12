@@ -32,9 +32,10 @@ def handle(bot: discord.Client, tree: discord.app_commands.CommandTree):
                               f"สร้างบัญชีเมื่อ: `{user_info.get('created_at', interaction_user.created_at).strftime('%d/%m/%Y')}`\n" +
                               f"เข้า server เมื่อ: `{user_info.get('joined_at', interaction_user.joined_at).strftime('%d/%m/%Y')}`\n",
                         inline=True)
-        embed.add_field(name="👾  ไอเท็ม\n",
+        embed.add_field(name="📦  ไอเท็ม\n",
                         value=f"_\n\n🪙 `{user_info.get('taro_coin', 0):,}` taro coin\n" +
-                              f"🌲 `{len(user_info.get('user_farm', []))}` total farm\n",
+                              f"🌲 `{len(user_info.get('user_farm', []))}` total farm\n"
+                              f"📦 `{len(user_info.get('user_inventory', []))}` farm inventory\n",
                         inline=True)
 
         await interaction.followup.send(embed=embed)

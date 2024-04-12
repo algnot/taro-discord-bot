@@ -43,3 +43,15 @@ class Item(Base):
         """)
 
         return result
+
+    def get_item_info_by_item_name(self, name: str):
+        result = self.execute("""
+            SELECT * FROM item WHERE name = :name
+        """, {
+            "name": name
+        })
+
+        if len(result) > 0:
+            return result[0]
+
+        return {}

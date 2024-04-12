@@ -1,5 +1,6 @@
 from .base import Base
 from .farm import Farm
+from .item import Item
 
 
 class User(Base):
@@ -63,3 +64,33 @@ class User(Base):
             farm.create_farm_of_user(user_id=id)
 
         self.logger.info(f"Create or update user id {id} done")
+
+    def buy_item(self, item_name: str, quantity: int):
+        item = Item()
+        item_info = item.get_item_info_by_item_name(name=item_name)
+
+        token = item_info.get("buy_token", "taro_coin")
+        total_price = item_info.get("buy_amount", 0) * quantity
+
+        user_token = self.execute(f"""
+            SELECT {token} FROM users WHERE id = :user_id
+        """, {
+            "user_id": self.id
+        })
+
+        if len(user_token) == 0:
+            raise UserWarning("❌ พบข้อผิดพลาดบางอย่างกรูณาลองอีกครั้ง")
+
+        if user_token[0].get(token) < total_price:
+            raise UserWarning(f"❌ จำนวน `{' '.join(token.split('_'))}` ไม่พอสำหรับการสั่งซื้อ "
+                              f"(ต้องการ `{total_price:,}` มีอยู่ `{user_token[0].get(token):,}`)")
+
+        from .vault import Vault
+        from .inventory import Inventory
+        taro_discord_id = int(self.config.get("TARO_DISCORD_USER_ID", 1154093547931312289))
+        vault = Vault()
+        inventory = Inventory(user_id=self.id)
+        transaction_id = vault.create_transaction(from_id=self.id, to_id=taro_discord_id, token_name=token, amount=total_price)
+        inventory.add_item_to_inventory(item_name=item_info.get("name", "Unknown"), quantity=quantity)
+
+        return transaction_id, item_info.get("emoji", "☘️")

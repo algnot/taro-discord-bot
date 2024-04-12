@@ -1,5 +1,5 @@
 import discord
-from .shop_menu import ShopMenuEmbed, ShopMenuView
+from .shop_menu import ShopMenuEmbed, ShopMenuView, ShopModal
 from .farm_menu import FarmMenuEmbed, FarmMenuView
 
 
@@ -16,4 +16,7 @@ async def handle_interaction(interaction: discord.Interaction, action: str):
 
         await interaction.message.edit(embed=embed, view=view, content="")
 
-    return
+    elif action == "buy":
+        await interaction.response.send_modal(
+            ShopModal(interaction=interaction, message_id=interaction.message.id)
+        )

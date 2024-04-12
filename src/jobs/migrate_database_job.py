@@ -81,8 +81,11 @@ def init_migrate_database_job(scheduler: BackgroundScheduler, bot: discord.Clien
 
         logger.info("Migrating inventory table..")
         create_column(engine, "inventory", "user_id", "BIGINT")
-        create_column(engine, "inventory", "item_bane", "TEXT")
+        create_column(engine, "inventory", "item_name", "TEXT")
         create_column(engine, "inventory", "quantity", "BIGINT DEFAULT 0")
+        base.execute("""
+            ALTER TABLE inventory ADD CONSTRAINT unique_user_item UNIQUE (user_id, item_name);
+        """)
         logger.info(f"Migrate inventory table done")
 
         logger.info("Migrating item table..")

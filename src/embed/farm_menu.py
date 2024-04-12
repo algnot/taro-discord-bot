@@ -1,6 +1,6 @@
 import discord
 from ..module.users import User
-import asyncio
+from ..module.item import Item
 
 
 class FarmMenuEmbed(discord.Embed):
@@ -15,13 +15,24 @@ class FarmMenuEmbed(discord.Embed):
         self.set_author(name=f"ฟาร์มของ {user_info.get('username', interaction_user.name)}\n",
                         icon_url=user_info.get("display_avatar", interaction_user.display_avatar.url))
 
+        inventory_message = ""
+        for item in user_info.get("user_inventory", []):
+            quantity = item.get("quantity", 0)
+
+            if quantity > 0:
+                item_model = Item()
+                item_info = item_model.get_item_info_by_item_name(name=item.get("item_name", ""))
+                emoji = item_info.get("emoji", "-")
+                item_name = " ".join(item.get("item_name", "").split("_"))
+                inventory_message += f"{emoji} `{quantity}` {item_name}\n"
+
         self.add_field(name="👾  ไอเท็ม\n",
                        value=f"_\n\n🪙 `{user_info.get('taro_coin', 0):,}` taro coin\n" +
                              f"🌲 `{len(user_info.get('user_farm', []))}` total farm\n",
                        inline=True)
 
         self.add_field(name="📦 Farm Inventory\n",
-                       value=f"_\n\n📦 `{len(user_info.get('user_inventory', []))}` total inventory\n",
+                       value=f"_\n\n{inventory_message}",
                        inline=True)
 
 

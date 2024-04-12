@@ -28,12 +28,18 @@ def handle(bot: discord.Client, tree: discord.app_commands.CommandTree):
     @bot.event
     async def on_interaction(interaction: discord.Interaction):
         if interaction.type == discord.InteractionType.component:
-            await interaction.response.defer()
+            ignore_clear_view = ["buy"]
+
             custom_id = interaction.data["custom_id"]
-            action, message_id, user_id = custom_id.split("-")
+            action = custom_id.split("-")[0]
+            user_id = custom_id.split("-")[2]
 
             if int(user_id) != interaction.user.id:
+                await interaction.response.defer()
                 await interaction.followup.send("❌ นี่ไม่ใช่ฟาร์มของคุณ พิมพ์ `/play` เพื่อดูฟาร์มของคุณ", ephemeral=True)
 
-            await interaction.message.edit(content="⌛ Game UI is loading..", view=None)
+            if action not in ignore_clear_view:
+                await interaction.response.defer()
+                await interaction.message.edit(content="⌛ Game UI is loading..", view=None)
+
             await handle_interaction(interaction=interaction, action=action)
