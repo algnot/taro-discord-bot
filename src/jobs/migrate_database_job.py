@@ -83,9 +83,7 @@ def init_migrate_database_job(scheduler: BackgroundScheduler, bot: discord.Clien
         create_column(engine, "inventory", "user_id", "BIGINT")
         create_column(engine, "inventory", "item_name", "TEXT")
         create_column(engine, "inventory", "quantity", "BIGINT DEFAULT 0")
-        base.execute("""
-            ALTER TABLE inventory ADD CONSTRAINT unique_user_item UNIQUE (user_id, item_name);
-        """)
+        create_constraint("inventory", "unique_user_item", ["user_id", "item_name"])
         logger.info(f"Migrate inventory table done")
 
         logger.info("Migrating item table..")
@@ -144,6 +142,17 @@ def init_migrate_database_job(scheduler: BackgroundScheduler, bot: discord.Clien
 
         except Exception as error:
             logger.error(f"Skip 'migrate_user_data' get some error {error}")
+
+    def create_constraint(table_name: str, constraint_name: str, unique: list):
+        try:
+            base = Base()
+            logger.info(f"ALTER TABLE {table_name} ADD CONSTRAINT {constraint_name} UNIQUE ({','.join(unique)});")
+            base.execute(f"""
+                ALTER TABLE {table_name} ADD CONSTRAINT {constraint_name} UNIQUE ({','.join(unique)});
+            """)
+        except Exception as e:
+            return False
+
 
     def create_column(engine, table, column_name, type):
         try:
