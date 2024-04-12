@@ -115,6 +115,8 @@ def init_migrate_database_job(scheduler: BackgroundScheduler, bot: discord.Clien
         create_column(engine, "farm", "user_id", "BIGINT")
         create_column(engine, "farm", "harvest_time", "TIMESTAMP")
         create_column(engine, "farm", "seed_name", "TEXT")
+        create_column(engine, "farm", "max_seed_count", "BIGINT DEFAULT 10")
+        create_column(engine, "farm", "seed_count", "BIGINT DEFAULT 0")
         create_column(engine, "farm", "harvest_count", "BIGINT DEFAULT 0")
         create_column(engine, "farm", "level", "BIGINT DEFAULT 1")
         create_column(engine, "farm", "is_decay", "BOOLEAN DEFAULT FALSE")

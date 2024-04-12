@@ -1,6 +1,6 @@
 import discord
 from .shop_menu import ShopMenuEmbed, ShopMenuView, ShopModal
-from .farm_menu import FarmMenuEmbed, FarmMenuView
+from .farm_menu import FarmMenuEmbed, FarmMenuView, FarmManagerEmbed, FarmManagerView
 
 
 async def handle_interaction(interaction: discord.Interaction, action: str):
@@ -20,3 +20,10 @@ async def handle_interaction(interaction: discord.Interaction, action: str):
         await interaction.response.send_modal(
             ShopModal(interaction=interaction, message_id=interaction.message.id)
         )
+
+    elif action == "farm":
+        embed = FarmManagerEmbed(interaction=interaction)
+        view = FarmManagerView(message_id=interaction.message.id, user_id=interaction.user.id,
+                               index=embed.farm_index, all_farm=embed.all_farm)
+
+        await interaction.message.edit(embed=embed, view=view, content="")
