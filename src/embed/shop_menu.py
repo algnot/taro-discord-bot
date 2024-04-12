@@ -5,6 +5,8 @@ import asyncio
 
 
 class ShopMenuEmbed(discord.Embed):
+    all_item: list = []
+
     def __init__(self, interaction:discord.Interaction):
         interaction_user = interaction.user
 
@@ -18,6 +20,7 @@ class ShopMenuEmbed(discord.Embed):
 
         item = Item()
         all_item_can_buy = item.get_all_item_can_buy()
+        self.all_item = all_item_can_buy
         message_item = ""
 
         for item_can_buy in all_item_can_buy:
@@ -36,12 +39,6 @@ class ShopMenuEmbed(discord.Embed):
         self.add_field(name="\n☘️ ไอเท็มในร้าน\n",
                        value=f"_\n\n{message_item}",
                        inline=False)
-
-        view = ShopMenuView(message_id=interaction.message.id, user_id=interaction_user.id, all_item=all_item_can_buy)
-        asyncio.run_coroutine_threadsafe(self.edit_view(view, interaction), interaction.client.loop)
-
-    async def edit_view(self, view, interaction):
-        await interaction.message.edit(view=view)
 
 
 class ShopMenuView(discord.ui.View):

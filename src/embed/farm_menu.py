@@ -4,7 +4,7 @@ import asyncio
 
 
 class FarmMenuEmbed(discord.Embed):
-    def __init__(self, interaction, message_id: int | None = None):
+    def __init__(self, interaction):
         interaction_user = interaction.user
 
         user = User(id=interaction_user.id)
@@ -23,15 +23,6 @@ class FarmMenuEmbed(discord.Embed):
         self.add_field(name="📦 Farm Inventory\n",
                        value=f"_\n\n📦 `{len(user_info.get('user_inventory', []))}` total inventory\n",
                        inline=True)
-
-        if message_id is not None:
-            return
-
-        view = FarmMenuView(message_id=interaction.message.id, user_id=interaction_user.id)
-        asyncio.run_coroutine_threadsafe(self.edit_view(view, interaction), interaction.client.loop)
-
-    async def edit_view(self, view, interaction):
-        await interaction.message.edit(view=view)
 
 
 class FarmMenuView(discord.ui.View):

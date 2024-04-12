@@ -20,7 +20,7 @@ def handle(bot: discord.Client, tree: discord.app_commands.CommandTree):
 
         message = await interaction.followup.send("⌛ Game UI is creating...")
 
-        embed = FarmMenuEmbed(interaction=interaction, message_id=message.id)
+        embed = FarmMenuEmbed(interaction=interaction)
         view = FarmMenuView(message_id=message.id, user_id=interaction.user.id)
 
         await message.edit(embed=embed, view=view, content="")
@@ -35,5 +35,5 @@ def handle(bot: discord.Client, tree: discord.app_commands.CommandTree):
             if int(user_id) != interaction.user.id:
                 await interaction.followup.send("❌ นี่ไม่ใช่ฟาร์มของคุณ พิมพ์ `/play` เพื่อดูฟาร์มของคุณ", ephemeral=True)
 
-            await interaction.message.edit(content="⌛ Game UI is loading..")
+            await interaction.message.edit(content="⌛ Game UI is loading..", view=None)
             await handle_interaction(interaction=interaction, action=action)
