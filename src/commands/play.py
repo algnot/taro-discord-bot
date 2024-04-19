@@ -37,6 +37,7 @@ def handle(bot: discord.Client, tree: discord.app_commands.CommandTree):
             if int(user_id) != interaction.user.id:
                 await interaction.response.defer()
                 await interaction.followup.send("❌ นี่ไม่ใช่ฟาร์มของคุณ พิมพ์ `/play` เพื่อดูฟาร์มของคุณ", ephemeral=True)
+                return
 
             if action not in ignore_clear_view:
                 await interaction.response.defer()
