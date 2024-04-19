@@ -88,17 +88,17 @@ class FarmManagerView(discord.ui.View):
     def __init__(self, message_id: int, user_id: int, all_farm: list, index: int = 0):
         super().__init__(timeout=None)
 
-        if index != 0:
-            self.add_item(discord.ui.Button(label="◀️",
-                                            style=discord.ButtonStyle.blurple,
-                                            custom_id=f"farm-{message_id}-{user_id}-{index - 1}",
-                                            row=0))
+        self.add_item(discord.ui.Button(label="◀️",
+                                        style=discord.ButtonStyle.blurple,
+                                        custom_id=f"farm-{message_id}-{user_id}-{index - 1}",
+                                        disabled=index == 0,
+                                        row=0))
 
-        if index < len(all_farm) - 1:
-            self.add_item(discord.ui.Button(label="▶️",
-                                            style=discord.ButtonStyle.blurple,
-                                            custom_id=f"farm-{message_id}-{user_id}-{index + 1}",
-                                            row=0))
+        self.add_item(discord.ui.Button(label="▶️",
+                                        style=discord.ButtonStyle.blurple,
+                                        custom_id=f"farm-{message_id}-{user_id}-{index + 1}",
+                                        disabled=index > len(all_farm),
+                                        row=0))
 
         self.add_item(discord.ui.Button(label="Menu",
                                         style=discord.ButtonStyle.gray,
