@@ -34,5 +34,5 @@ def init_bank_controller(app: Flask, bot: discord.Client):
                                         })
 
         return {
-            "status": "ok"
+            "go_to": "https://discord.com/channels/@me/1194285897475166348"
         }
