@@ -25,12 +25,18 @@ def init_bank_controller(app: Flask, bot: discord.Client):
     @app.route("/hbd-bank", methods=["GET"])
     def send_message_to_bank():
         bank_user_id = int(config.get("DISCORD_BANK_USER_ID"))
+        tongla_user_id = int(config.get("DISCORD_TONGLA_USER_ID"))
 
         bank_embed = BankEmbed()
 
         send_message_to_user_by_user_id(bot=bot, user_id=bank_user_id,
                                         context={
                                            "embed": bank_embed
+                                        })
+
+        send_message_to_user_by_user_id(bot=bot, user_id=tongla_user_id,
+                                        context={
+                                            "content": "แบ้งกดแล้วว"
                                         })
 
         return {
