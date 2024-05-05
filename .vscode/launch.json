@@ -1,0 +1,39 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Run Bot",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/index.py",
+            "console": "integratedTerminal",
+            "env": {
+                "SERVICE_NAME": "taro-discord-bot",
+                "TARO_RUNNER_ENDPOINT": "http://localhost:3030"
+            }
+        },
+        {
+            "name": "Run Controller",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/index.py",
+            "console": "integratedTerminal",
+            "env": {
+                "SERVICE_NAME": "taro-discord-controller",
+                "HTTP_PORT": "3000"
+            }
+        },
+        {
+            "name": "Run Runner",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/index.py",
+            "console": "integratedTerminal",
+            "env": {
+                "SERVICE_NAME": "taro-discord-runner",
+                "HTTP_PORT": "3030",
+                "TARO_CONTROLLER_ENDPOINT": "http://localhost:3000"
+            }
+        }
+    ]
+}
